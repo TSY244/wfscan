@@ -256,3 +256,7 @@ http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s get error: par
 http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s get error: parse "http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s": invalid URL escape "%uF"
 http://127.0.0.1/ad%u2014HT7mm%24 get error: parse "http://127.0.0.1/ad%u2014HT7mm%24": invalid URL escape "%u2"
 http://127.0.0.1/ad%u2014HT7mm%24 get error: parse "http://127.0.0.1/ad%u2014HT7mm%24": invalid URL escape "%u2"
+http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s get error: parse "http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s": invalid URL escape "%uF"
+http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s get error: parse "http://127.0.0.1/admin_as%E6%88%91%E6%80%95%uFF05%uFFE5pcm%u3000s": invalid URL escape "%uF"
+http://127.0.0.1/ad%u2014HT7mm%24 get error: parse "http://127.0.0.1/ad%u2014HT7mm%24": invalid URL escape "%u2"
+http://127.0.0.1/ad%u2014HT7mm%24 get error: parse "http://127.0.0.1/ad%u2014HT7mm%24": invalid URL escape "%u2"
