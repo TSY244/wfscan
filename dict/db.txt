@@ -1,4 +1,6 @@
-﻿/admin.php
+﻿/siteserver
+/admin.php
+/siteserver
 /xdjtadmin.php
 /sellerAdmin.php
 /admin_login.asp

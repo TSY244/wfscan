@@ -23,6 +23,7 @@ Author: AU9U5T    Version: ` + config.Version + `
 func Flag(config *config.Config) {
 	banner()
 	flag.StringVar(&config.Host, "h", "", "IP address of the host you want to scan,for example: 192.168.11.11")
+	flag.IntVar(&config.Port, "p", 80, "Port of the host you want to scan,for example: 80")
 	flag.StringVar(&config.Url, "u", "", "for example: http://www.baidu.com")
 	flag.StringVar(&config.Dict, "d", "../dict", "for example: /usr/share/wordlists/dirb/common.txt")
 	flag.IntVar(&config.GoroutineNum, "g", 10, "Set goroutine nums")

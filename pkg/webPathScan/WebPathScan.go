@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/gookit/color"
 	"github.com/panjf2000/ants"
 	"io"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 
 const (
 	// MAXGOROUTINENUM Represents the maximum allowed number of concurrent coroutines.
-	MAXGOROUTINENUM = 20
+	MAXGOROUTINENUM = 10000
 
 	// DEFAULTGOROUTINENUM Is the default number of coroutines to use when there is no specific configuration.
 	DEFAULTGOROUTINENUM = 10
@@ -60,17 +61,17 @@ func (scanner *WebPathScanner) SetSleepTime(sleepTime time.Duration) {
 	scanner.sleepTime = sleepTime
 }
 
-func colorPrint(url, webPath string, length int64, status string) {
-
+func colorPrint(url, webPath, method string, length int64, status string) {
 	switch status {
 	case "200 OK":
-		fmt.Printf("\033[32m%s length:%d status:%s \n\033[0m", url+webPath, length, status)
-	case "301 Moved Permanently", "302 Found":
-		fmt.Printf("\033[34m%s length:%d status:%s \n\033[0m", url+webPath, length, status)
+		// fmt print green
+		color.Greenf("url: %s, method: %s, length: %d, status: %s\n", url+webPath, method, length, status)
 	case "403 Forbidden":
-		fmt.Printf("\033[31m%s length:%d status:%s \n\033[0m", url+webPath, length, status)
+		color.Redf("url: %s, method: %s, length: %d, status: %s\n", url+webPath, method, length, status)
+	case "301 Moved Permanently", "302 Found":
+		color.Bluef("url: %s, method: %s, length: %d, status: %s\n", url+webPath, method, length, status)
 	default:
-		fmt.Printf("\033[37m%s length:%d status:%s \n\033[0m", url+webPath, length, status)
+		color.Grayf("url: %s, method: %s, length: %d, status: %s\n", url+webPath, method, length, status)
 	}
 }
 
@@ -94,7 +95,7 @@ func sendRequest(method, url, webPath string) error {
 
 	length := resp.ContentLength
 	status := resp.Status
-	colorPrint(url, webPath, length, status)
+	colorPrint(url, webPath, method, length, status)
 	return nil
 
 }
@@ -105,16 +106,18 @@ func logError(url, webPath, err string) {
 
 }
 
-func worker(url, webPath string, count *int64, lock *sync.Mutex) {
+func worker(url, webPath string, sleepTime time.Duration) {
 	webPath = strings.Replace(webPath, "\r", "", -1)
 	if !strings.HasPrefix(webPath, "/") {
 		webPath = "/" + webPath
 	}
-	// http
+
+	// get
 	err := sendRequest("GET", url, webPath)
 	if err != nil {
 		logError(url, webPath, err.Error())
 	}
+	time.Sleep(sleepTime)
 
 	// post
 	err = sendRequest("POST", url, webPath)
@@ -122,10 +125,7 @@ func worker(url, webPath string, count *int64, lock *sync.Mutex) {
 		logError(url, webPath, err.Error())
 	}
 
-	if lock.TryLock() {
-		*count++
-		lock.Unlock()
-	}
+	time.Sleep(sleepTime)
 
 }
 
@@ -174,15 +174,21 @@ func (scanner *WebPathScanner) getLineData(file string) ([]string, error) {
 	lineData := make([]string, 0)
 	fileReader := bufio.NewReader(filePoint)
 	for {
-		if Data, err := fileReader.ReadString('\n'); err != nil {
+		Data, err := fileReader.ReadString('\n')
+		if err != nil {
 			if err == io.EOF { // The last line doesn't \n
 				if len(Data) > 0 {
 					lineData = append(lineData, Data)
 				}
 				break
 			}
+		}
+		Data = strings.TrimRight(Data, "\n")
+		Data = strings.TrimRight(Data, "\r")
+		if Data[0] == 239 {
+			lineData = append(lineData, Data[3:])
 		} else {
-			lineData = append(lineData, strings.TrimRight(Data, "\n"))
+			lineData = append(lineData, Data)
 		}
 	}
 	return lineData, nil
@@ -195,19 +201,18 @@ func (scanner *WebPathScanner) scanFile() {
 	}
 
 	var wg sync.WaitGroup
-	var count int64
 	pool, _ := ants.NewPool(scanner.goroutineNum)
 	defer pool.Release()
-
 	for _, data := range lineData {
 		wg.Add(1)
 		err = pool.Submit(func() {
-			worker(scanner.url, data, &count, &sync.Mutex{})
+			worker(scanner.url, data, scanner.sleepTime)
 			wg.Done()
 		})
 		if err != nil {
 			panic(err)
 		}
+		//worker(scanner.url, data, &count, &sync.Mutex{}, scanner.sleepTime)
 	}
 	wg.Wait()
 }
@@ -218,7 +223,6 @@ func (scanner *WebPathScanner) scanDict() {
 		panic(err)
 	}
 	var wg sync.WaitGroup
-	var count int64
 	pool, _ := ants.NewPool(scanner.goroutineNum)
 	defer pool.Release()
 	for _, fileName := range fileList {
@@ -229,16 +233,16 @@ func (scanner *WebPathScanner) scanDict() {
 		for _, data := range lineData {
 			wg.Add(1)
 			err = pool.Submit(func() {
-				worker(scanner.url, data, &count, &sync.Mutex{})
+				worker(scanner.url, data, scanner.sleepTime)
 				wg.Done()
 			})
 			if err != nil {
 				panic(err)
 			}
+			//worker(scanner.url, data, scanner.sleepTime)
 		}
 	}
 	wg.Wait()
-	fmt.Println("count: ", count)
 }
 
 func (scanner *WebPathScanner) Run() (bool, error) {

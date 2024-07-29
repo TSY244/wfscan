@@ -1,6 +1,9 @@
 package webPathScan
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type WebPathScannerAttrFunc func(scanner *WebPathScanner)
 type WebPathScannerAttrFuncs []WebPathScannerAttrFunc
@@ -26,7 +29,8 @@ func WebPathScannerWithUrl(url string) WebPathScannerAttrFunc {
 func WebPathScannerWithGoroutineNum(num int) WebPathScannerAttrFunc {
 	return func(scanner *WebPathScanner) {
 		if MAXGOROUTINENUM < num {
-			panic("MaxGoroutineNum < num ,MaxGoroutineNum=100")
+			strMaxPOrt := strconv.Itoa(MAXGOROUTINENUM)
+			panic("MaxGoroutineNum < num ,MaxGoroutineNum=" + strMaxPOrt)
 		}
 		scanner.goroutineNum = num
 	}
