@@ -18,14 +18,14 @@ const (
 	// MAXGOROUTINENUM Represents the maximum allowed number of concurrent coroutines.
 	MAXGOROUTINENUM = 10000
 
-	// DEFAULTGOROUTINENUM Is the default number of coroutines to use when there is no specific configuration.
-	DEFAULTGOROUTINENUM = 10
+	// GOROUTINENUM Is the default number of coroutines to use when there is no specific configuration.
+	GOROUTINENUM = 10
 
 	// DEFAULTDICT default dict is a directory
 	DEFAULTDICT = "../dict"
 
-	// DEFAULTSLEEPTIME
-	DEFAULTSLEEPTIME = 0
+	// SLEEPTIME  default sleep time
+	SLEEPTIME = 0
 )
 
 type WebPathScanner struct {
@@ -37,8 +37,8 @@ type WebPathScanner struct {
 
 func NewWebPathScanner(fs ...WebPathScannerAttrFunc) *WebPathScanner {
 	scanner := &WebPathScanner{
-		sleepTime:    DEFAULTSLEEPTIME,
-		goroutineNum: DEFAULTGOROUTINENUM,
+		sleepTime:    SLEEPTIME,
+		goroutineNum: GOROUTINENUM,
 		dict:         DEFAULTDICT,
 	}
 	WebPathScannerAttrFuncs(fs).Apply(scanner)
